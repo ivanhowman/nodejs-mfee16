@@ -28,7 +28,7 @@
         var xhr = new XMLHttpRequest();
         // HTTP nethod:GET, POST,...
         xhr.open("GET","http://34.217.120.25:3000",true);
-        xhr.onload = function(response){
+        xhr.onload = function(this.responseText){
             message.innerText = `非同步請求 load ${this.responseText}`;
         };
         xhr.send();
