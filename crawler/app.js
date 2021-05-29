@@ -1,9 +1,26 @@
-<<<<<<< HEAD
-https://www.twse.com.tw/exchangeReport/STOCK_DAY?
 
-response=json   //格式
-&date=20210524  //日期
-&stockNo=2002   // 股票代號
-=======
-努力中
->>>>>>> 09f7632af7730c1e46d992cf99b27c6e75c0454d
+https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date=20210524&stockNo=2002
+
+// response=json   //格式
+// &date=20210524  //日期
+// &stockNo=2002   // 股票代號
+var axios = require('axios');
+
+axios.get('https://www.twse.com.tw/exchangeReport/STOCK_DAY?', {
+    params: {
+        response:'json',
+        date:'20210524',
+        stockNo:'2002',
+    }
+  })
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  })
+  .then(function () {
+    // always executed
+  });  
+
+
