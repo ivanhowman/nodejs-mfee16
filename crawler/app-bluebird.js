@@ -4,11 +4,12 @@
 // &stockNo=2610
 
 const axios = require("axios");
-const fs = require("fs/promises");
+const fs = require("fs");
 const moment = require("moment");
+const Promise = require("bluebird");
 
-// console.log(moment().format()); // 2021-05-30T13:45:06+08:00
-// console.log(moment().format("YYYYMMDD")); // 20210530
+console.log(moment().format()); // 2021-05-30T13:45:06+08:00
+console.log(moment().format("YYYYMMDD")); // 20210530
 
 // function readFilePromise() {
 //   return new Promise((resolve, reject) => {
@@ -20,8 +21,10 @@ const moment = require("moment");
 //     });
 //   });
 // }
+// use bluebird
+const readFileBlue = Promise.promisify(fs.readFile);
 
-fs.readFile("stock.txt", "utf8")
+readFileBlue("stock.txt", "utf8")
   .then((stockCode) => {
     console.log("stockCode:", stockCode);
 
