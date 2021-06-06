@@ -20,7 +20,7 @@ connection = Promise.promisifyAll(connection);
   try {
     await connection.connectAsync();
 
-    //讀取STOCK.TXT    老師我改數字TXT怎麼吃不到
+    
     let stockCode = await fs.readFile("stock.txt", "utf-8");
     console.log(`我的 stock code: ${stockCode}`);
     let stock = await connection.queryAsync(`SELECT stock_id FROM stock WHERE stock_id = ${stockCode}`);
