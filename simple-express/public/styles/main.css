@@ -1,29 +1,58 @@
-body {
-    margin: 0;
-    padding: 0;
-  }
-  
-  #content {
-    padding: 10px;
-  }
-  
-  /* table */
-  
-  table {
-    border-collapse: collapse;
-  }
-  
-  th,
-  td {
-    text-align: center;
-    padding: 8px;
-  }
-  
-  tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
-  
-  th {
-    background-color: #04aa6d;
-    color: white;
-  }
+h1 {
+	font-size: 3em;
+	font-weight: bolder;
+	line-height: 1em;
+	text-align: center;
+	color: #fc7507;
+	font-style:initial;
+}
+.container {
+	margin: 0 auto;
+	width: 40%;
+	text-align: center;
+}
+
+.container td,
+.container th {
+	padding: 2%;
+	color: #3a5e18;
+}
+a {
+	color: #185875;
+	text-decoration: none;
+	
+}
+tbody tr:nth-child(even) {
+	background: #f5f7fa;
+}
+tbody tr:nth-child(odd) {
+	background: #c3cfe2;
+}
+thead {
+	background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+	/* padding: 0.8em; */
+	color: #185875;
+}
+.pagination {
+	display: flex;
+	margin: 20px auto;
+	justify-content: center;
+}
+
+.pagination a {
+	color: black;
+	float: left;
+	padding: 8px 16px;
+	text-decoration: none;
+}
+
+.pagination a.active {
+	background-color: #4caf50;
+	color: white;
+	border-radius: 5px;
+}
+
+.pagination a:hover:not(.active) {
+	background-color: #ddd;
+	border-radius: 5px;
+}
