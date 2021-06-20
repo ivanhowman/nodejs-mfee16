@@ -12,6 +12,7 @@ const myStorage = multer.diskStorage({
     // routes/auth.js -> 現在的位置
     // public/uploads -> 希望找到的位置
     // /routes/../public/uploads
+    // ** public/uploads 要先建立好 **
     cb(null, path.join(__dirname, "../", "public", "uploads"));
   },
   filename: function (req, file, cb) {
@@ -84,7 +85,7 @@ router.post(
       return next(new Error("已經註冊過了"));
     }
 
-    // 取得上傳檔案
+    // 此行檢查如有沒有圖片 有圖片才抓
     let filepath = req.file ? "/uploads/" + req.file.filename : null;
     // {
     //   fieldname: 'photo',
@@ -107,7 +108,7 @@ router.post(
           req.body.email,
           await bcrypt.hash(req.body.password, 10),
           req.body.name,
-          `/uploads/${req.file.filename}`,
+          filepath,
         ],
       ]
     );
@@ -118,6 +119,42 @@ router.post(
 
 router.get("/login", (req, res) => {
   res.render("auth/login");
+});
+
+const loginRules = [
+    body("email").isEmail(),
+    body("password").isLength({ min: 6 }),
+]
+
+router.post("/login", async (req, res) => {
+    const validateResult = validationResult(req);
+    if (!validateResult.isEmpty()) {
+      // 不是空的，就是有問題
+      // 暫時先這樣做
+      return next(new Error("登入資料有問題"));
+    }
+
+    //檢查一下這個 email存不存在
+    let member = await connection.queryAsync(
+        "SELECT * FROM members WHERE email = ?",
+        req.body.email
+      );
+      if (member.length === 0) {
+        // 暫時先這樣做
+        return next(new Error("查無此帳號"));
+      }
+      member = member[0];
+
+      //比對密碼
+      //因為 bcrypt 每次加密的結果都不依樣,所以不能單純的比對字串
+      //必須要用 bcrypt 提供的比對函式
+
+      let result = await bcrypt.compare(req.body.password, member.password);
+      if (result) {
+          res.send("登入成功");
+      }else {
+          res.send("登入失敗");
+      }
 });
 
 module.exports = router;
