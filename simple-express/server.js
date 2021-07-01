@@ -1,114 +1,109 @@
-const connection = require("./utils/db");
-
-// http://expressjs.com/en/starter/hello-world.html
-// 導入 express 這個 package
 const express = require("express");
-// 利用 express 建立一個 express application
-let app = express();
-
-// module < package < framework
-// express is a package，但完整到足以被稱為是框架
-
-// npm i body-parser
-// const bodyParser = reqiure("body-parser");
-// app.use(bodyParser.urlencoded({ extended: false }));
-// 但是， express 在某版本後，有把 epxress.urlencoded 加回來了
-// 所以就可以直接用
-// 加上這個中間件，我們就可以解讀 post 過來的資料
+const app = express();
+const port = 3000;
+// const Promise = require("bluebird");
+require("dotenv").config();
+// const connection = require("./uilts/db.js");
+let stockRouter = require("./routes/stock");
+let apiRouter = require("./routes/api");
+let authRouter = require("./routes/auth");
+let memberRouter = require("./routes/member");
+// 寫入cookie(存在瀏覽器),用res.cookie()設定
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+//session
+const expressSession = require("express-session");
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
+  })
+);
+// 解讀POST資料
 app.use(express.urlencoded({ extended: false }));
-
-// 可以指定一個或多個目錄是「靜態資源目錄」
-// 自動幫你為 public 裡面的檔案建立路由
-// /javascripts/api.js
-// /styles/main.css
-// /images/101.jpeg
+//載入靜態檔案
 app.use(express.static("public"));
-// app.use("/admin", express.static("public-admin"));
 
-// 設定一些 application 變數
 // 第一個是變數 views
 // 第二個是檔案夾名稱
 app.set("views", "views");
 // 告訴 express 我們用的 view engine 是 pug
 app.set("view engine", "pug");
 
-// middleware 中間件 中介函式
-// 在 express 裡
-// req -> router
-// req -> middleware..... -> router
+//取用session寫在主伺服器中間件以共用
+app.use(function (req, res, next) {
+  //res.locals.member傳給PUG看
+  res.locals.member = req.session.member;
+  next();
+});
+
 app.use(function (req, res, next) {
   let current = new Date();
   console.log(`有人來訪問了喔 在 ${current}`);
-  // 「幾乎」都要呼叫，讓他往下繼續
+  // 幾乎都要呼叫，讓他往下繼續
   next();
-  console.log();
 });
-
-app.use(function (req, res, next) {
-  console.log("無用 Middleware");
-  // 「幾乎」都要呼叫，讓他往下繼續
-  next();
-  console.log("after 無用 middleware");
-});
-
-let stockRouter = require("./routes/stock");
-app.use("/stock", stockRouter);
-let apiRouter = require("./routes/api");
-app.use("/api", apiRouter);
-let authRouter = require("./routes/auth");
-app.use("/auth", authRouter);
-// http://localhost:3000/auth/register
-// http://localhost:3000/auth/login
-
-// 路由 router
-// (request, response) {} 去回應這個請求
-app.get("/", function (req, res) {
-  // res.send("Hello Express BBB");
-  console.log("這裡是首頁");
+app.get("/", (req, res) => {
+  // res.send("Hello express!");
   res.render("index");
-  // views/index.pug
 });
 
-app.get("/about", function (req, res, next) {
-  // res.send("About Express AAAA");
+app.get("/about", function (req, res) {
+  // res.send("About Express");
   res.render("about");
 });
 
-// app.get("/about", function (req, res) {
-//   console.log("我是 ABOUT - BBBBB");
-//   res.send("<h1>About Express BBBB</h1>");
+app.use("/api", apiRouter); // /api是顯示出來的網址 不是來源的路境
+
+app.use("/stock", stockRouter);
+
+app.use("/auth", authRouter);
+
+app.use("/member", memberRouter);
+// app.get("/stock", async function (req, res) {
+//   try {
+//     // await connection.connectAsync();
+//     let result = await connection.queryAsync(
+//       `SELECT stock_id,stock_name FROM stock`
+//     );
+//     res.render("./stock/list", { stocks: result });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// });
+
+// app.get("/stock/:stockCode", async function (req, res) {
+//   try {
+//     // await connection.connectAsync(); 若加此行重新整理造成重複連接會出錯
+//     let result = await connection.queryAsync(
+//       `SELECT * FROM stock_price WHERE stock_id=? ORDER BY date`,
+//       req.params.stockCode
+//     );
+//     res.render("./stock/detail", { stocks: result });
+//   } catch (err) {
+//     console.log(err);
+//   }
 // });
 
 app.get("/test", function (req, res) {
-  // res.send("Test Express");
-  next();
+  res.send("Test Express");
 });
-
-app.use(function (req, res, next) {
-  console.log("啊啊啊，有人 404 了!!!");
-  next();
-});
-
 // 所有的路由的下面
 app.use(function (req, res, next) {
   // 表示前面的路由都找不到
   // http status code: 404
   res.status(404);
-  res.render("404");
+  res.send("404");
 });
 
 // 500 error
 // 放在所有的路由的後面
 // 這裡一定要有4個參數-->最後的錯誤處理
-// express 預設的錯誤處理函式
 app.use(function (err, req, res, next) {
-  console.log("ERROR:", err.message);
+  console.log(err.message);
   res.status(500);
-  res.send("500 - Internal Sever Error 請洽系統管理員");
+  res.send("500 - Internal Sever Error 請洽系統管理員 XD </br>" + err.message);
 });
-
-app.listen(3000, async () => {
-  // 在 web server 開始的時候，去連線資料庫
-  await connection.connectAsync();
-  console.log(`我跑起來了喔 在 port 3000`);
+app.listen(port, () => {
+  console.log(`listening :${port}`);
 });
